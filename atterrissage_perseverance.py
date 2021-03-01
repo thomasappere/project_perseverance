@@ -6,7 +6,10 @@
 #       Le but est de faire atterrir le rover sur la barre rouge avec une vitesse verticale vy <= 20.
 #
 # CALLING SEQUENCE:
-#        Dans le Terminal, taper : python3 atterrissage_perseverance.py
+#       Dans le Terminal, taper : python3 atterrissage_perseverance.py
+#       Ou exécuter ce programme dans un IDE Python.
+#       Pour relancer le jeu, exécuter de nouveau le programme.
+#       Lorsqu'on ferme la fenêtre, une erreur apparaît, c'est normal.
 #
 # INPUTS:
 #
@@ -32,11 +35,10 @@ import numpy as np
 
 #Canevas (canvas en anglais) = zone de l'écran où on peut dessiner
 
-pesanteur_martienne = 38
-#increment_poussee_retrofusee_centrale = -0.5 #incrément de poussée due à la rétrofusée centrale (selon y)
-#increment_poussee_retrofusee_laterale = 0.5 #incrément de poussée due aux rétrofusées latérales (selon x)
-poussee_retrofusee_centrale_max = -100 #poussée maximale due à la rétrofusée centrale (selon y)
-poussee_retrofusee_laterale_max = 15 #poussée maximale due aux rétrofusées latérales (selon x)
+pesanteur_martienne = 3.8 #Intensité de la pesanteur sur Mars (en m/s^-2)
+poussee_retrofusee_centrale_max = -40 #poussée maximale due à la rétrofusée centrale (selon y)
+poussee_retrofusee_laterale_max = 5 #poussée maximale due aux rétrofusées latérales (selon x)
+v_max = 10 #Vitesse maximale à l'atterrissage (en m/s)
 
 class Game:
     #Classe qui forme le contrôleur principal du programme
@@ -44,17 +46,15 @@ class Game:
         self.fenetre = Tk() #fenêtre par défaut (Tk est lui-même un objet)
         self.fenetre.title("Simulation de l'atterrissage de Perseverance sur Mars") #titre de la fenêtre
         self.fenetre.resizable(False, False) #redimensionnement de la fenêtre impossible ni en largeur, ni en hauteur
-        #self.tk.wm_attributes("-topmost", 1) #-topmost: met la fenêtre au-dessus des autres. 1 pour activer cette option
         self.canevas = Canvas(self.fenetre, width=700, height=700) #paramètres de la zone de dessin
         self.canevas.pack() #pour que la zone de dessin se redimensionne aux dimensions données à la ligne précédente
-        #self.canevas.focus_set()
         self.fenetre.update()
         self.hauteur_canevas = self.canevas.winfo_height()
         self.largeur_canevas = self.canevas.winfo_width()
         self.fond = PhotoImage(file = 'landing_site.gif')
         self.canevas.create_image(0, 0, anchor=NW, image=self.fond)
         self.titre = self.canevas.create_text(140,5, text='18 février 2021, cratère Jezero, planète Mars', anchor=NW, font=('Helvetica', '20', 'bold'))
-        self.succes_texte = self.canevas.create_text(10,75, text='Pour gagner, il faut atterrir dans la \nzone d\'atterrissage avec vy <= 15', anchor=NW)
+        self.succes_texte = self.canevas.create_text(10,75, text='Pour gagner, il faut atterrir dans la \nzone d\'atterrissage avec vy <= '+str(v_max)+' m/s', anchor=NW)
         self.lutins = []
         self.enfonction = True
 
@@ -63,9 +63,8 @@ class Game:
             if self.enfonction == True:
                 for lutin in self.lutins:
                     lutin.deplacer()
-                #self.fenetre.update_idletasks()
-                self.fenetre.update()
-                time.sleep(0.01)
+            self.fenetre.update()
+            time.sleep(0.05)
 
 class Lander:
     #Classe pour créer le lander = rover muni de son module d'atterrissage
@@ -89,19 +88,16 @@ class Lander:
         jeu.canevas.bind_all('<KeyPress-Down>', self.allumage_retrofusee_centrale) #bind_all : pour lier l'événement à tous les widgets de l'application
         jeu.canevas.bind_all('<KeyPress-Left>', self.allumage_retrofusee_gauche)
         jeu.canevas.bind_all('<KeyPress-Right>', self.allumage_retrofusee_droite)
-        #self.poussee_retrofusee_centrale_texte = self.canevas.create_text(10, 10, text='Rétrofusée centrale coupée', anchor=NW, fill='red')
-        self.poussee_centrale_texte = self.canevas.create_text(10,35, text='poussee retrofusee centrale = '+str(int(self.poussee_retrofusee_centrale)), anchor=NW)
-        self.poussee_laterale_texte = self.canevas.create_text(10,50, text='poussee retrofusees laterales = '+str(int(self.poussee_retrofusee_gauche) - int(self.poussee_retrofusee_droite)), anchor=NW)
-        self.vitesse_texte = self.canevas.create_text(10,105, text='vy = '+str(int(self.vy)), anchor=NW)
+        self.poussee_centrale_texte = self.canevas.create_text(10,35, text='poussee retrofusee centrale = '+str(int(self.poussee_retrofusee_centrale))+' N', anchor=NW)
+        self.poussee_laterale_texte = self.canevas.create_text(10,50, text='poussee retrofusees laterales = '+str(int(self.poussee_retrofusee_gauche) - int(self.poussee_retrofusee_droite))+' N', anchor=NW)
+        self.vitesse_texte = self.canevas.create_text(10,105, text='vy = '+str(int(self.vy))+' m/s', anchor=NW)
 
     def allumage_retrofusee_centrale(self, evt): #l'objet evt (événement) doit être inclus en paramètre sinon Python déclenche une erreur
         if self.bas == True:
             self.bas = False
             self.poussee_retrofusee_centrale = 0
-            #self.canevas.itemconfig(self.poussee_retrofusee_centrale_texte, text='Rétrofusée centrale coupée', fill='red')
         else:
             self.bas = True
-            #self.canevas.itemconfig(self.poussee_retrofusee_centrale_texte, text='Rétrofusée centrale allumée', fill='green')
 
     def allumage_retrofusee_gauche(self, evt): #l'objet evt (événement) doit être inclus en paramètre sinon Python déclenche une erreur
         if self.gauche == True:
@@ -119,10 +115,10 @@ class Lander:
 
     def deplacer(self):
         if self.y >= 420: #l'image lander_v2.gif fait 200 px de hauteur et le sol est à y=620
-            if self.vy > 20:
+            if self.vy > v_max:
                 jeu.message_final = self.canevas.create_text(270,200, text='BOOM !', anchor=NW, font=('Helvetica', '48', 'bold'))
                 jeu.enfonction = False
-            elif self.x < 290 or self.x > 410-95:
+            elif self.x < 290 or self.x > 410-90:
                 jeu.message_final = self.canevas.create_text(60,200, text='Zone d\'atterrissage ratée !', anchor=NW, font=('Helvetica', '48', 'bold'))
                 jeu.enfonction = False
             else:
@@ -132,8 +128,6 @@ class Lander:
 
         maintenant = time.time() #instant à l'appel de la fonction deplacer()
         temps_ecoule = maintenant - self.time
-        #if self.bas == True and self.poussee_retrofusee_centrale > poussee_retrofusee_centrale_max: #Pour augmenter la poussee par incrément
-        #    self.poussee_retrofusee_centrale = self.poussee_retrofusee_centrale + increment_poussee_retrofusee_centrale
         if self.bas == True:
             self.poussee_retrofusee_centrale = poussee_retrofusee_centrale_max
         if self.gauche == True:
@@ -147,9 +141,9 @@ class Lander:
         self.canevas.move(self.lander, self.delta_x, self.delta_y) #ATTENTION : ici, self.delta_y est compris comme un delta y qui s'ajoute à la position précédente
         self.x = self.canevas.coords(self.lander)[0] #position du lander selon x
         self.y = self.canevas.coords(self.lander)[1] #position du lander selon y
-        self.canevas.itemconfig(self.vitesse_texte, text='vy = '+str(int(self.vy)))
-        self.canevas.itemconfig(self.poussee_centrale_texte, text ='poussee retrofusee centrale = '+str(int(self.poussee_retrofusee_centrale)))
-        self.canevas.itemconfig(self.poussee_laterale_texte, text ='poussee retrofusees laterales = '+str(int(self.poussee_retrofusee_gauche)-int(self.poussee_retrofusee_droite)))
+        self.canevas.itemconfig(self.vitesse_texte, text='vy = '+str(int(self.vy))+' m/s')
+        self.canevas.itemconfig(self.poussee_centrale_texte, text ='poussee retrofusee centrale = '+str(int(self.poussee_retrofusee_centrale))+' N')
+        self.canevas.itemconfig(self.poussee_laterale_texte, text ='poussee retrofusees laterales = '+str(int(self.poussee_retrofusee_gauche)-int(self.poussee_retrofusee_droite))+' N')
         self.time = time.time()
 
 class Central_rocket:
@@ -197,7 +191,7 @@ class Debris:
         self.canevas = jeu.canevas
         self.image_debris = PhotoImage(file = 'debris2.gif')
     def deplacer(self):
-        if perseverance.y >=420 and perseverance.vy > 20:
+        if perseverance.y >=420 and perseverance.vy > v_max:
             perseverance.image_lander = jeu.canevas.delete(perseverance.image_lander)
             self.debris = jeu.canevas.create_image(perseverance.x-90, perseverance.y+160, anchor=NW, image=self.image_debris)
 
