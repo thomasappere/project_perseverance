@@ -4,6 +4,7 @@ pesanteur_martienne = 3.8 #Intensité de la pesanteur sur Mars (en m/s^-2)
 poussee_retrofusee_centrale_max = -40 #poussée maximale due à la rétrofusée centrale (selon y)
 poussee_retrofusee_laterale_max = 5 #poussée maximale due aux rétrofusées latérales (selon x)
 v_max = 10 #Vitesse maximale à l'atterrissage (en m/s)
+and other changes in the code such as a larger tolerance for landing.
 
 Simulation of Perseverance landing in Jezero crater with Python.
 The skycrane is controlled with keypad:
