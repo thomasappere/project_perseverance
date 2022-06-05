@@ -3,7 +3,7 @@
 #
 # PURPOSE:
 #    	Simulation de l'atterrissage du rover Perseverance dans le cratère Jezero, planète Mars
-#       Le but est de faire atterrir le rover sur la barre rouge avec une vitesse verticale vy <= 20.
+#       Le but est de faire atterrir le rover sur la barre rouge avec une vitesse verticale vy <= 15.
 #
 # CALLING SEQUENCE:
 #       Dans le Terminal, taper : python3 atterrissage_perseverance.py
@@ -30,7 +30,11 @@
 #       Créé entre juin et août 2020 par Thomas Appéré thomas.appere@ac-rennes.fr
 
 from tkinter import *
+from pygame import mixer
 import time
+
+mixer.init() #pour le son des retrofusees
+mixer.music.load("retrofusee.mp3")
 
 gravity = 3.8
 central_thrust_max = 73000.
@@ -83,10 +87,19 @@ class Lander:
         if self.y >= landing_site.y1-200: #200 est la hauteur de l'image lander.gif
             if self.vy >= vmax:
                 jeu.canevas.create_text(jeu.windowWidth/2, 200, text='BOOM !', font=('Helvetica', '48', 'bold'))
+                mixer.music.stop()
+                mixer.music.load("explosion.mp3")
+                mixer.music.play()
             elif self.x < landing_site.x1 or self.x > landing_site.x2-83:
                 jeu.canevas.create_text(jeu.windowWidth/2, 200, text='Zone d\'atterrissage ratée !', font=('Helvetica', '30', 'bold'))
+                mixer.music.stop()
+                mixer.music.load("out_of_landing_site.mp3")
+                mixer.music.play()
             else:
                 jeu.canevas.create_text(jeu.windowWidth/2, 200, text='We\'re safe on Mars !', font=('Helvetica', '30', 'bold'))
+                mixer.music.stop()
+                mixer.music.load("touchdown.mp3")
+                mixer.music.play()
             jeu.enfonction = False
             return
 
@@ -104,6 +117,12 @@ class Lander:
             self.left_thrust = 0
         if right_rocket.allume == False:
             self.right_thrust = 0
+
+        if not central_rocket.allume and not left_rocket.allume and not right_rocket.allume: #toutes retrofusees eteintes
+            mixer.music.stop()
+        else:
+            mixer.music.play() #au moins une retrofusee allumee
+
         delta_vx = delta_t * (self.left_thrust - self.right_thrust)/self.mass_lander
         delta_vy = delta_t * (gravity - self.central_thrust/self.mass_lander)
         self.vx = self.vx + delta_vx
