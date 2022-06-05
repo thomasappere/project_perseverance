@@ -1,9 +1,9 @@
 # project_perseverance
 Update on 3/1/2021:
-- gravity = 3.8 #Intensité de la pesanteur sur Mars (en m/s^-2)
-- central_thrust_max = 73000. #poussée maximale due à la rétrofusée centrale (selon y)
-- lateral_thrust_max = 9000 #poussée maximale due aux rétrofusées latérales (selon x)
-- vmax = 15 #Vitesse maximale à l'atterrissage (en m/s)
+- gravity = 3.8 #gravity on Mars (in m/s^-2)
+- central_thrust_max = 73000. #maximal thrust due to central retrorocket (selon y)
+- lateral_thrust_max = 9000 #maximal thrust due to lateral retrorockets (selon x)
+- vmax = 15 #maximal vertical speed for a successful landing (en m/s)
 
 and other changes in the code such as a larger tolerance for landing.
 
